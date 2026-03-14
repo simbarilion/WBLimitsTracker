@@ -55,25 +55,29 @@ https://t.me/Marketlimit_bot
 ### Команды бота
 
 /start — начало работы и ввод API-ключа
+
 /select — выбор складов (через запятую ID)
+
 /check — мгновенная проверка лимитов
+
 /help — список команд
+
 
 ## Структура проекта
 
-├── app/
-│   ├── bot.py
-│   ├── config.py
-│   ├── db.py
-│   ├── handlers.py
-│   ├── routes.py
-│   ├── scheduler.py
-│   ├── services.py
-│   └── logging_config.py
-├── run.py
-├── pyproject.toml
-├── .env
-└── README.md
+    ├── app/
+    │   ├── bot.py
+    │   ├── config.py
+    │   ├── db.py
+    │   ├── handlers.py
+    │   ├── routes.py
+    │   ├── scheduler.py
+    │   ├── services.py
+    │   └── logging_config.py
+    ├── run.py
+    ├── pyproject.toml
+    ├── .env
+    └── README.md
 
 ### Улучшения
 
