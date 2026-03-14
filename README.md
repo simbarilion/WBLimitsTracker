@@ -44,8 +44,12 @@ DB_PATH=/data/database.db
 ```
 4. Запуск
 ```
+USE_POLLING=0
 poetry run python run.py
 http://127.0.0.1:5000/
+
+USE_POLLING=1
+https://t.me/Marketlimit_bot
 ```
 
 ### Команды бота
