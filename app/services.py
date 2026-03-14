@@ -1,0 +1,39 @@
+import requests
+from app.logging_config import setup_logger
+
+def get_warehouses(api_key):
+    url = 'https://suppliers-api.wildberries.ru/api/v1/warehouses'
+    headers = {'Authorization': api_key}
+    try:
+        r = requests.get(url, headers=headers)
+        r.raise_for_status()
+        setup_logger().info("GET-запрос успешно обработан")
+        result = r.json()
+        setup_logger().info("Данные преобразованы в json-формат")
+        return result
+    except Exception as e:
+        setup_logger().error(f"Ошибка при загрузке складов: {e}")
+        return None
+
+def check_limits(api_key, warehouse_ids):
+    if not warehouse_ids:
+        setup_logger().warning(f"Склады не выбраны")
+        return 'No warehouses selected'
+    url = f'https://suppliers-api.wildberries.ru/api/v1/acceptance/coefficients?warehouseIDs={warehouse_ids}'
+    headers = {'Authorization': api_key}
+    try:
+        r = requests.get(url, headers=headers)
+        r.raise_for_status()
+        setup_logger().info("GET-запрос успешно обработан")
+        data = r.json()
+        setup_logger().info("Данные преобразованы в json-формат")
+        available = []
+        for item in data:
+            if item.get('coefficient', 999) <= 1 and item.get('allowUnload', False):
+                available.append(
+                    f"Warehouse {item['warehouseID']} on {item['date']}: coefficient {item['coefficient']}"
+                )
+        return 'Available free/cheap limits:\n' + '\n'.join(available) if available else 'No available free/cheap limits currently.'
+    except Exception as e:
+        setup_logger().error(f"Ошибка проверки лимитов: {e}")
+        return f'Error checking limits: {str(e)}'
