@@ -1,3 +1,4 @@
+import telegram
 from telegram.ext import Application
 from .config import TELEGRAM_TOKEN
 from .handlers import register_handlers
@@ -11,3 +12,5 @@ logger.info("Создан экземпляр приложения")
 register_handlers(application)
 logger.info("Зарегистрированы хэндлеры")
 setup_logger(log_to_console=True).info("Бот запущен")
+
+bot = telegram.Bot(token=TELEGRAM_TOKEN)

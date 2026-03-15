@@ -12,7 +12,7 @@ logger = setup_logger(__name__)
 @contextmanager
 def get_db() -> Generator[sqlite3.Connection, None, None]:
     """Контекстный менеджер для подключения к базе"""
-    conn = sqlite3.connect(DB)
+    conn = sqlite3.connect(DB, check_same_thread=False)
     logger.info(f"Соединение с базой данных {DB} открыто")
     try:
         yield conn

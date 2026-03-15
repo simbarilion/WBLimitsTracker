@@ -1,9 +1,8 @@
 from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, CallbackContext, filters, Application
-from .db import init_db
 from .logging_config import setup_logger
 from .services import get_warehouses, check_limits
-from user_repository import get_user, create_user, update_warehouses
+from .user_repository import get_user, create_user, update_warehouses
 
 logger = setup_logger(__name__)
 
@@ -14,7 +13,6 @@ async def start(update: Update, _: CallbackContext) -> None:
         return
 
     chat_id = update.effective_chat.id
-    init_db()
     user = get_user(chat_id)
     if user:
         await update.message.reply_text(

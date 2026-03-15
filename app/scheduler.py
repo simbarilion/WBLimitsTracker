@@ -3,15 +3,12 @@ from typing import Optional
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
+from .bot import bot
 from .services import check_limits
-from .config import TELEGRAM_TOKEN
-import telegram
 from app.logging_config import setup_logger
 from .user_repository import get_users
 
 logger = setup_logger(__name__)
-
-bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 last_run_time: Optional[datetime] = None
 

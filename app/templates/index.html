@@ -9,11 +9,11 @@
         <div class="container">
           <h2 class="mb-4">🤖 Bot Status</h2>
           <div class="card p-3 shadow-sm">
-            <p><b>Status:</b> <span class="text-success">Online</span></p>
-            <p><b>Total users:</b> {total_users}</p>
-            <p><b>Paid users:</b> {paid_users}</p>
-            <p><b>Last scheduler run:</b> {last_check}</p>
-            <p><b>Last check:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+            <p><b>Total users:</b> {{ total_users }}</p>
+            <p><b>Paid users:</b> {{ paid_users }}</p>
+            <p><b>Last scheduler run:</b> {{ last_run }}</p>
+            <p><b>Current time:</b> {{ now }}</p>
+            <p><b>Last check:</b> {{ now }}</p>
           </div>
         </div>
       </body>

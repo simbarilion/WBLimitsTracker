@@ -5,14 +5,12 @@ import telegram
 from .config import TELEGRAM_TOKEN, WEBHOOK_URL
 from .logging_config import setup_logger
 from .scheduler import last_run_time
-from .bot import application
+from .bot import application, bot
 from .user_repository import get_users_count, get_paid_users_count
 
 logger = setup_logger(__name__)
 
 bp = Blueprint("routes", __name__, template_folder="templates")
-
-bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 @bp.route(f"/{TELEGRAM_TOKEN}", methods=["POST"])
 def webhook():
