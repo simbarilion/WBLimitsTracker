@@ -1,7 +1,8 @@
-from app.bot import application
 import os
-from app.config import TELEGRAM_TOKEN, WEBHOOK_URL
+
 from app import create_app
+from app.bot import application
+from app.config import TELEGRAM_TOKEN, WEBHOOK_URL
 
 if __name__ == "__main__":
     """Точка входа приложения: запускает бота в режиме polling или webhook"""

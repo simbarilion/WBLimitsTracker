@@ -1,10 +1,11 @@
-import sqlite3
 import os
-from .config import DB
-from app.logging_config import setup_logger
+import sqlite3
 from contextlib import contextmanager
 from typing import Generator
 
+from app.logging_config import setup_logger
+
+from .config import DB
 
 logger = setup_logger(__name__)
 
@@ -27,8 +28,9 @@ def init_db():
         os.makedirs(dir_path, exist_ok=True)
     with get_db() as conn:
         cur = conn.cursor()
-        cur.execute('''CREATE TABLE IF NOT EXISTS users
-                     (chat_id INTEGER PRIMARY KEY, api_key TEXT, warehouses TEXT, paid INTEGER DEFAULT 0)''')
+        cur.execute(
+            """CREATE TABLE IF NOT EXISTS users
+                     (chat_id INTEGER PRIMARY KEY, api_key TEXT, warehouses TEXT, paid INTEGER DEFAULT 0)"""
+        )
         conn.commit()
         logger.info(f"Инициализирована таблица users в базе данных {DB}")
-

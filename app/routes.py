@@ -1,16 +1,18 @@
 from datetime import datetime
-from flask import Blueprint, request, render_template
-import telegram
 
+import telegram
+from flask import Blueprint, render_template, request
+
+from .bot import application, bot
 from .config import TELEGRAM_TOKEN, WEBHOOK_URL
 from .logging_config import setup_logger
 from .scheduler import last_run_time
-from .bot import application, bot
-from .user_repository import get_users_count, get_paid_users_count
+from .user_repository import get_paid_users_count, get_users_count
 
 logger = setup_logger(__name__)
 
 bp = Blueprint("routes", __name__, template_folder="templates")
+
 
 @bp.route(f"/{TELEGRAM_TOKEN}", methods=["POST"])
 def webhook():
@@ -23,6 +25,7 @@ def webhook():
         logger.error(f"Ошибка webhook: {e}")
         return f"error: {e}", 500
 
+
 @bp.route("/set_webhook", methods=["GET"])
 def set_webhook():
     """Устанавливает webhook для Telegram-бота"""
@@ -33,12 +36,13 @@ def set_webhook():
         logger.error(f"Ошибка установки webhook: {e}")
         return f"Webhook setup failed: {e}"
 
+
 @bp.route("/")
 def index():
     """Отображает страницу статуса бота и статистику пользователей"""
     total_users = get_users_count()
     paid_users = get_paid_users_count()
-    last_check = last_run_time.strftime('%Y-%m-%d %H:%M:%S') if last_run_time else "ещё не запускался"
+    last_check = last_run_time.strftime("%Y-%m-%d %H:%M:%S") if last_run_time else "ещё не запускался"
 
     return render_template(
         "index.html",

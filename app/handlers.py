@@ -1,8 +1,9 @@
 from telegram import Update
-from telegram.ext import CommandHandler, MessageHandler, CallbackContext, filters, Application
+from telegram.ext import Application, CallbackContext, CommandHandler, MessageHandler, filters
+
 from .logging_config import setup_logger
-from .services import get_warehouses, check_limits
-from .user_repository import get_user, create_user, update_warehouses
+from .services import check_limits, get_warehouses
+from .user_repository import create_user, get_user, update_warehouses
 
 logger = setup_logger(__name__)
 
@@ -15,13 +16,9 @@ async def start(update: Update, _: CallbackContext) -> None:
     chat_id = update.effective_chat.id
     user = get_user(chat_id)
     if user:
-        await update.message.reply_text(
-            "Welcome back! Use /check to check limits, /select to change warehouses."
-        )
+        await update.message.reply_text("Welcome back! Use /check to check limits, /select to change warehouses.")
     else:
-        await update.message.reply_text(
-            "Welcome! Please enter your Wildberries API key to get started."
-        )
+        await update.message.reply_text("Welcome! Please enter your Wildberries API key to get started.")
 
 
 async def select(update: Update, _: CallbackContext) -> None:
@@ -33,20 +30,21 @@ async def select(update: Update, _: CallbackContext) -> None:
     row = get_user(chat_id)
     if not row:
         logger.warning("Установите свой ключ API")
-        await update.message.reply_text('Please set your API key first.')
+        await update.message.reply_text("Please set your API key first.")
         return
     api_key = row[0]
     warehouses = get_warehouses(api_key)
     if not warehouses:
-        await update.message.reply_text('Error fetching warehouses. Check your API key.')
+        await update.message.reply_text("Error fetching warehouses. Check your API key.")
         logger.warning("Установите свой ключ API")
         return
-    text = 'Available warehouses:\n'
+    text = "Available warehouses:\n"
     for w in warehouses:
         text += f"{w['id']} - {w['name']}\n"
-    text += '\nSend comma-separated IDs of warehouses you want to monitor.'
+    text += "\nSend comma-separated IDs of warehouses you want to monitor."
     await update.message.reply_text(text)
-    logger.info(f"Отправлен список складов")
+    logger.info("Отправлен список складов")
+
 
 async def check(update: Update, _: CallbackContext) -> None:
     """Проверяет лимиты приёмки для выбранных пользователем складов"""
@@ -57,16 +55,17 @@ async def check(update: Update, _: CallbackContext) -> None:
     row = get_user(chat_id)
     if not row:
         logger.warning("Выполните настройку с помощью /start")
-        await update.message.reply_text('Please setup first with /start.')
+        await update.message.reply_text("Please setup first with /start.")
         return
     api_key, whs, paid = row
     if not whs:
-        await update.message.reply_text('Please select warehouses with /select.')
+        await update.message.reply_text("Please select warehouses with /select.")
         logger.warning("Выберите склады с помощью /select")
         return
     msg = check_limits(api_key, whs)
     await update.message.reply_text(msg)
-    logger.info(f"Отправлен список остатков по складам")
+    logger.info("Отправлен список остатков по складам")
+
 
 async def help_command(update: Update, _: CallbackContext) -> None:
     """Отправляет список доступных команд бота"""
@@ -74,13 +73,11 @@ async def help_command(update: Update, _: CallbackContext) -> None:
         return
 
     text = (
-        "/start - регистрация\n"
-        "/select - выбрать склады\n"
-        "/check - проверить лимиты\n"
-        "/subscribe - подписка\n"
+        "/start - регистрация\n" "/select - выбрать склады\n" "/check - проверить лимиты\n" "/subscribe - подписка\n"
     )
     await update.message.reply_text(text)
-    logger.info(f"Отправлен список команд")
+    logger.info("Отправлен список команд")
+
 
 async def echo(update: Update, _: CallbackContext) -> None:
     """Повторяет текст сообщения пользователя"""
@@ -90,13 +87,15 @@ async def echo(update: Update, _: CallbackContext) -> None:
     await update.message.reply_text(f"Ты написал: {update.message.text}")
     logger.info(f"Отправлено сообщение 'Ты написал: {update.message.text}'")
 
+
 async def unknown(update: Update, _: CallbackContext) -> None:
     """Обрабатывает неизвестные команды"""
     if update.message is None:
         return
 
     await update.message.reply_text("Извини, я не знаю такую команду")
-    logger.info(f"Отправлено сообщение 'Извини, я не знаю такую команду'")
+    logger.info("Отправлено сообщение 'Извини, я не знаю такую команду'")
+
 
 async def text_handler(update: Update, _: CallbackContext) -> None:
     """Обрабатывает текст пользователя: сохраняет API-ключ или выбранные склады"""
@@ -108,15 +107,15 @@ async def text_handler(update: Update, _: CallbackContext) -> None:
     row = get_user(chat_id)
     if not row:
         create_user(chat_id, text)
-        await update.message.reply_text('API key set. Now use /select to choose warehouses.')
+        await update.message.reply_text("API key set. Now use /select to choose warehouses.")
         logger.info("Отправлено сообщение 'API-ключ установлен. Используйте /select для выбора складов'")
 
-    elif row[1] == '':
+    elif row[1] == "":
         update_warehouses(chat_id, text)
-        await update.message.reply_text('Warehouses selected. Use /check to check limits.')
+        await update.message.reply_text("Warehouses selected. Use /check to check limits.")
         logger.info("Отправлено сообщение 'Склад выбран. Используйте /check для отслеживания остатков'")
     else:
-        await update.message.reply_text('Unknown input. Use commands.')
+        await update.message.reply_text("Unknown input. Use commands.")
         logger.warning("Введена некорректная команда")
 
 

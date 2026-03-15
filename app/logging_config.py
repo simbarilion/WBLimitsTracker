@@ -3,16 +3,18 @@ import logging
 from pathlib import Path
 from typing import Literal
 
-
 LogLevel = int | Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
-def setup_logger(name: str = None,
-                 level: LogLevel = "INFO",
-                 log_file: str | None = None,
-                 log_to_console: bool = False,
-                 fmt: str = "%(asctime)s - %(levelname)s - logger:%(name)s - module:%(module)s - func:%(funcName)s:%(lineno)d - %(message)s",
-                 clear_log_on_start: bool = True,
-                 ) -> logging.Logger:
+
+def setup_logger(
+    name: str = None,
+    level: LogLevel = "INFO",
+    log_file: str | None = None,
+    log_to_console: bool = False,
+    fmt: str = """%(asctime)s - %(levelname)s - logger:%(name)s - module:%(module)s -
+    func:%(funcName)s:%(lineno)d - %(message)s""",
+    clear_log_on_start: bool = True,
+) -> logging.Logger:
     """
     Настраивает универсальный логгер для проекта.
     :param name: Имя логгера (обычно __name__)

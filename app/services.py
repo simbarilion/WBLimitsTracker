@@ -1,8 +1,8 @@
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
 import requests
-from app.logging_config import setup_logger
 
+from app.logging_config import setup_logger
 
 logger = setup_logger(__name__)
 
@@ -22,10 +22,11 @@ def get_warehouses(api_key: str) -> Optional[List[Dict]]:
         logger.error(f"Ошибка при загрузке складов: {e}")
         return None
 
+
 def check_limits(api_key: str, warehouse_ids: str) -> str:
     """Проверяет коэффициенты приёмки по выбранным складам Wildberries"""
     if not warehouse_ids:
-        logger.warning(f"Склады не выбраны")
+        logger.warning("Склады не выбраны")
         return "No warehouses selected"
     url = f"https://suppliers-api.wildberries.ru/api/v1/acceptance/coefficients?warehouseIDs={warehouse_ids}"
     headers = {"Authorization": api_key}
@@ -41,7 +42,11 @@ def check_limits(api_key: str, warehouse_ids: str) -> str:
                 available.append(
                     f"Warehouse {item['warehouseID']} on {item['date']}: coefficient {item['coefficient']}"
                 )
-        return "Available free/cheap limits:\n" + "\n".join(available) if available else "No available free/cheap limits currently."
+        return (
+            "Available free/cheap limits:\n" + "\n".join(available)
+            if available
+            else "No available free/cheap limits currently."
+        )
     except Exception as e:
         logger.error(f"Ошибка проверки лимитов: {e}")
         return f"Error checking limits: {str(e)}"

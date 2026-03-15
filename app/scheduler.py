@@ -3,14 +3,16 @@ from typing import Optional
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
+from app.logging_config import setup_logger
+
 from .bot import bot
 from .services import check_limits
-from app.logging_config import setup_logger
 from .user_repository import get_users
 
 logger = setup_logger(__name__)
 
 last_run_time: Optional[datetime] = None
+
 
 def scheduled_check() -> None:
     """Периодически проверяет лимиты складов для платных пользователей и отправляет уведомления"""
@@ -32,7 +34,7 @@ def scheduled_check() -> None:
 def start_scheduler() -> None:
     """Запускает планировщик задач для регулярной проверки лимитов"""
     scheduler = BackgroundScheduler()
-    logger.info(f"Создан объект планировщика задач BackgroundScheduler")
+    logger.info("Создан объект планировщика задач BackgroundScheduler")
     scheduler.add_job(scheduled_check, "interval", hours=1)
     scheduler.start()
-    logger.info(f"Планировщик задач scheduler запущен")
+    logger.info("Планировщик задач scheduler запущен")

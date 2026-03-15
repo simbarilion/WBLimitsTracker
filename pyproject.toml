@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "My-shop-bot"
+name = "WBLimitsTracker"
 version = "0.1.0"
 description = "A project to develop a Telegram bot for tracking Wildberries orders"
 authors = [
