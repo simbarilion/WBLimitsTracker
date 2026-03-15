@@ -1,87 +1,109 @@
 # WB Limits Tracker
 
-**Telegram-бот для мониторинга лимитов отгрузки Wildberries**
+**Телеграм-бот для отслеживания лимитов приёмки на Wildberries**
 
-Помогает селлерам WB быстро находить бесплатные и дешёвые слоты на складах.  
-Бот проверяет коэффициенты приёмки, уведомляет платных пользователей и показывает статус в реальном времени.
-
+Позволяет пользователям регистрироваться, выбирать склады и получать уведомления о доступных лимитах.
 
 ## Основные возможности
 
-- Установка API-ключа Wildberries
-- Выбор нужных складов для мониторинга
-- Проверка текущих лимитов и коэффициентов (`coefficient <= 1` + `allowUnload`)
-- Автоматические уведомления каждый час (для платных пользователей)
-- Веб-страница статуса (`/`) с количеством пользователей и временем последней проверки
-- Поддержка платной подписки (`paid = 1`)
+- Регистрация и управление API-ключом Wildberries
+- Выбор складов для мониторинга
+- Проверка доступных лимитов через команду /check
+- Автоматическая проверка лимитов с уведомлением пользователей
+- Веб-интерфейс для просмотра статистики (общее количество пользователей, платные пользователи, 
+последнее выполнение scheduler)
+- Логирование действий и ошибок
 
 ## Технологии
 
 - **Python 3.12**
-- **Flask** + **python-telegram-bot**
-- **SQLite** (можно легко поменять на PostgreSQL)
-- **APScheduler** (фоновые задачи)
-- **Poetry** (управление зависимостями)
-- **Flake8** + **Black** (стиль кода)
+- **Flask** для веб-интерфейса и webhook
+- **python-telegram-bot v20+**
+- **SQLite** для хранения пользователей
+- **APScheduler** для периодических задач
+- **requests** для взаимодействия с API Wildberries
 
-## Запуск приложения
+## Установка
 
-### 1. Клонирование
+### 1. Клонируем репозиторий:
 ```bash
 git clone https://github.com/simbarilion/wb-limits-tracker.git
 cd wb-limits-tracker
 ```
-2. Установка зависимостей
+
+2. Создаём и активируем виртуальное окружение:
 ```
+python -m venv .venv
+source .venv/bin/activate  # Linux / Mac
+.venv\Scripts\activate     # Windows
+```
+
+3. Устанавливаем зависимости:
+```
+pip install -r requirements.txt
+
+через poetry:
 poetry install
 ```
-3. Пример настройки окружения
+
+4. Создаём файл .env в корне проекта:
 ```
-FLASK_DEBUG=1
 USE_POLLING=1
 TELEGRAM_TOKEN=your_telegram_token
-DB_PATH=/data/database.db
+DB_PATH=./database.db
 ```
 4. Запуск
 ```
+Режим webhook:
 USE_POLLING=0
-poetry run python run.py
+python run.py
 http://127.0.0.1:5000/
 
+Режим polling (для локальной разработки):
 USE_POLLING=1
+python run.py
 https://t.me/Marketlimit_bot
 ```
 
 ### Команды бота
 
-/start — начало работы и ввод API-ключа
+/start — Регистрация пользователя и установка API-ключа
 
-/select — выбор складов (через запятую ID)
+/select — Выбор складов для мониторинга
 
-/check — мгновенная проверка лимитов
+/check — Проверка лимитов выбранных складов
 
-/help — список команд
-
+/help — Показать все доступные команды
 
 ## Структура проекта
 
-    ├── app/
-    │   ├── bot.py
-    │   ├── config.py
-    │   ├── db.py
-    │   ├── handlers.py
-    │   ├── routes.py
-    │   ├── scheduler.py
-    │   ├── services.py
-    │   └── logging_config.py
-    ├── run.py
-    ├── pyproject.toml
-    ├── .env
-    └── README.md
+    app/
+    ├─ bot.py              # Инициализация бота и Application
+    ├─ handlers.py         # Обработчики команд Telegram
+    ├─ user_repository.py  # Работа с базой пользователей (CRUD)
+    ├─ services.py         # Работа с API Wildberries
+    ├─ db.py               # Инициализация SQLite + контекстный менеджер
+    ├─ scheduler.py        # Планировщик регулярной проверки лимитов
+    ├─ routes.py           # Flask Blueprint + HTML templates
+    ├─ config.py           # Конфигурация проекта (.env)
+    ├─ logging_config.py   # Настройка логирования
+    ├─ templates/
+    │  └─ index.html       # Веб-шаблон для страницы статуса
+    └─ __init__.py         # Создание Flask-приложения
+    run.py                 # Точка входа приложения
+    pyproject.toml
+    .env
+    README.md
+
+### Логи
+
+- Все действия и ошибки логируются в папку logs/.
+
+- Можно выводить логи в консоль через log_to_console=True.
 
 ### Улучшения
 
-В настоящее время переписываю бот на FastAPI + async + PostgreSQL + Pydantic (полностью асинхронный и production-ready).
+В настоящее время переписываю бот на FastAPI + async + PostgreSQL + Pydantic
 
 ### Автор
 
