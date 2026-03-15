@@ -1,72 +1,51 @@
-import sqlite3
 from datetime import datetime
-from flask import Blueprint, request
+from flask import Blueprint, request, render_template
 import telegram
 
-from .config import TELEGRAM_TOKEN, WEBHOOK_URL, DB
+from .config import TELEGRAM_TOKEN, WEBHOOK_URL
 from .logging_config import setup_logger
 from .scheduler import last_run_time
 from .bot import application
+from .user_repository import get_users_count, get_paid_users_count
 
-bp = Blueprint("routes", __name__)
+logger = setup_logger(__name__)
+
+bp = Blueprint("routes", __name__, template_folder="templates")
 
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
 @bp.route(f"/{TELEGRAM_TOKEN}", methods=["POST"])
 def webhook():
+    """Принимает webhook обновления от Telegram и передаёт их боту"""
     try:
         update = telegram.Update.de_json(request.get_json(force=True), bot)
         application.update_queue.put_nowait(update)
         return "ok", 200
     except Exception as e:
-        setup_logger().error(f"Ошибка webhook: {e}")
+        logger.error(f"Ошибка webhook: {e}")
         return f"error: {e}", 500
 
-@bp.route('/set_webhook', methods=['GET'])
+@bp.route("/set_webhook", methods=["GET"])
 def set_webhook():
+    """Устанавливает webhook для Telegram-бота"""
     try:
         bot.set_webhook(url=WEBHOOK_URL, drop_pending_updates=True)
         return "Webhook setup ok"
     except Exception as e:
-        setup_logger().error(f"Ошибка установки webhook: {e}")
+        logger.error(f"Ошибка установки webhook: {e}")
         return f"Webhook setup failed: {e}"
 
-@bp.route('/')
+@bp.route("/")
 def index():
-    conn = sqlite3.connect(DB)
-    setup_logger().info(f"Соединение с базой данных {DB} открыто")
-    cur = conn.cursor()
-    cur.execute("SELECT COUNT(*) FROM users")
-    setup_logger().info(f"Получено количество пользователей")
-    total_users = cur.fetchone()[0]
-
-    cur.execute("SELECT COUNT(*) FROM users WHERE paid = 1")
-    setup_logger().info(f"Получено количество пользователей со статусом paid")
-    paid_users = cur.fetchone()[0]
-    conn.close()
-
+    """Отображает страницу статуса бота и статистику пользователей"""
+    total_users = get_users_count()
+    paid_users = get_paid_users_count()
     last_check = last_run_time.strftime('%Y-%m-%d %H:%M:%S') if last_run_time else "ещё не запускался"
 
-    html = f"""
-    <!doctype html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <title>Bot Status</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-      </head>
-      <body class="p-4">
-        <div class="container">
-          <h2 class="mb-4">🤖 Bot Status</h2>
-          <div class="card p-3 shadow-sm">
-            <p><b>Status:</b> <span class="text-success">Online</span></p>
-            <p><b>Total users:</b> {total_users}</p>
-            <p><b>Paid users:</b> {paid_users}</p>
-            <p><b>Last scheduler run:</b> {last_check}</p>
-            <p><b>Last check:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-          </div>
-        </div>
-      </body>
-    </html>
-    """
-    return html
+    return render_template(
+        "index.html",
+        total_users=total_users,
+        paid_users=paid_users,
+        last_run=last_check,
+        now=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    )

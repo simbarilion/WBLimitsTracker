@@ -4,13 +4,14 @@ from app.config import TELEGRAM_TOKEN, WEBHOOK_URL
 from app import create_app
 
 if __name__ == "__main__":
+    """Точка входа приложения: запускает бота в режиме polling или webhook"""
     USE_POLLING = os.getenv("USE_POLLING", "1") == "1"
 
     if USE_POLLING:
-        print("🔹 Starting bot in polling mode...")
+        print("Starting bot in polling mode...")
         application.run_polling()
     else:
-        print("🔹 Starting Flask + webhook mode...")
+        print("Starting Flask + webhook mode...")
         app = create_app()
 
         # application.run_webhook(

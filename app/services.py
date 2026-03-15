@@ -1,39 +1,47 @@
+from typing import Optional, List, Dict
+
 import requests
 from app.logging_config import setup_logger
 
-def get_warehouses(api_key):
-    url = 'https://suppliers-api.wildberries.ru/api/v1/warehouses'
-    headers = {'Authorization': api_key}
+
+logger = setup_logger(__name__)
+
+
+def get_warehouses(api_key: str) -> Optional[List[Dict]]:
+    """Получает список складов продавца из API Wildberries"""
+    url = "https://suppliers-api.wildberries.ru/api/v1/warehouses"
+    headers = {"Authorization": api_key}
     try:
         r = requests.get(url, headers=headers)
         r.raise_for_status()
-        setup_logger().info("GET-запрос успешно обработан")
+        logger.info("GET-запрос успешно обработан")
         result = r.json()
-        setup_logger().info("Данные преобразованы в json-формат")
+        logger.info("Данные преобразованы в json-формат")
         return result
     except Exception as e:
-        setup_logger().error(f"Ошибка при загрузке складов: {e}")
+        logger.error(f"Ошибка при загрузке складов: {e}")
         return None
 
-def check_limits(api_key, warehouse_ids):
+def check_limits(api_key: str, warehouse_ids: str) -> str:
+    """Проверяет коэффициенты приёмки по выбранным складам Wildberries"""
     if not warehouse_ids:
-        setup_logger().warning(f"Склады не выбраны")
-        return 'No warehouses selected'
-    url = f'https://suppliers-api.wildberries.ru/api/v1/acceptance/coefficients?warehouseIDs={warehouse_ids}'
-    headers = {'Authorization': api_key}
+        logger.warning(f"Склады не выбраны")
+        return "No warehouses selected"
+    url = f"https://suppliers-api.wildberries.ru/api/v1/acceptance/coefficients?warehouseIDs={warehouse_ids}"
+    headers = {"Authorization": api_key}
     try:
         r = requests.get(url, headers=headers)
         r.raise_for_status()
-        setup_logger().info("GET-запрос успешно обработан")
+        logger.info("GET-запрос успешно обработан")
         data = r.json()
-        setup_logger().info("Данные преобразованы в json-формат")
+        logger.info("Данные преобразованы в json-формат")
         available = []
         for item in data:
-            if item.get('coefficient', 999) <= 1 and item.get('allowUnload', False):
+            if item.get("coefficient", 999) <= 1 and item.get("allowUnload", False):
                 available.append(
-                    f"Warehouse {item['warehouseID']} on {item['date']}: coefficient {item['coefficient']}"
+                    f"Warehouse {item["warehouseID"]} on {item["date"]}: coefficient {item["coefficient"]}"
                 )
-        return 'Available free/cheap limits:\n' + '\n'.join(available) if available else 'No available free/cheap limits currently.'
+        return "Available free/cheap limits:\n" + "\n".join(available) if available else "No available free/cheap limits currently."
     except Exception as e:
-        setup_logger().error(f"Ошибка проверки лимитов: {e}")
-        return f'Error checking limits: {str(e)}'
+        logger.error(f"Ошибка проверки лимитов: {e}")
+        return f"Error checking limits: {str(e)}"
